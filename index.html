@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spotlight Scenario Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-secondary: #555;
+    --ink-tertiary: #999;
+    --surface: #ffffff;
+    --surface-secondary: #f7f6f3;
+    --surface-tertiary: #f0ede8;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.2);
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #085041;
+    --amber-light: #FAEEDA;
+    --amber-dark: #633806;
+    --amber-mid: #EF9F27;
+    --purple-light: #EEEDFE;
+    --purple-dark: #3C3489;
+    --purple-mid: #AFA9EC;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface-secondary);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .app { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* Header */
+  .header { margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .header-top { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .wordmark { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); letter-spacing: -0.02em; }
+  .wordmark span { font-style: italic; color: var(--green); }
+  .tagline { font-size: 12px; color: var(--ink-tertiary); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* Screen management */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Access screen */
+  .access-wrap { max-width: 420px; margin: 4rem auto; text-align: center; }
+  .access-wrap h1 { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1.2; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+  .access-wrap h1 em { font-style: italic; color: var(--green); }
+  .access-wrap p { font-size: 14px; color: var(--ink-secondary); margin-bottom: 2rem; line-height: 1.6; }
+  .access-field { width: 100%; padding: 12px 16px; font-size: 15px; font-family: 'DM Sans', sans-serif; border: 1.5px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); color: var(--ink); text-align: center; letter-spacing: 0.05em; margin-bottom: 0.75rem; transition: border-color 0.15s; }
+  .access-field:focus { outline: none; border-color: var(--green); }
+  .access-field::placeholder { color: var(--ink-tertiary); letter-spacing: 0; }
+  .access-error { font-size: 13px; color: #A32D2D; margin-bottom: 0.75rem; min-height: 20px; }
+  .btn-primary { width: 100%; padding: 12px; background: var(--ink); color: white; border: none; border-radius: var(--radius); font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+  .btn-primary:hover { background: #333; }
+  .btn-primary:active { transform: scale(0.99); }
+
+  /* Profile bar */
+  .profile-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 2rem; }
+  .profile-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .profile-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--green-dark); flex-shrink: 0; }
+  .profile-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .profile-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surface-tertiary); color: var(--ink-secondary); border: 1px solid var(--border); }
+  .pill strong { color: var(--ink); font-weight: 500; }
+  .logout-btn { font-size: 12px; color: var(--ink-tertiary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+  .logout-btn:hover { color: var(--ink-secondary); }
+
+  /* Scenario input */
+  .input-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; }
+  .input-label { font-size: 11px; color: var(--ink-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: block; }
+  .scenario-textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-strong); border-radius: var(--radius); background: var(--surface-secondary); color: var(--ink); font-size: 14px; font-family: 'DM Sans', sans-serif; resize: vertical; min-height: 90px; line-height: 1.6; transition: border-color 0.15s; }
+  .scenario-textarea:focus { outline: none; border-color: var(--green); background: var(--surface); }
+  .scenario-textarea::placeholder { color: var(--ink-tertiary); }
+  .analyse-btn { margin-top: 12px; padding: 10px 24px; background: var(--ink); color: white; border: none; border-radius: var(--radius); font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+  .analyse-btn:hover { background: #333; }
+  .analyse-btn:disabled { background: var(--ink-tertiary); cursor: not-allowed; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 3rem; color: var(--ink-secondary); font-size: 14px; }
+  .loading-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin: 0 3px; animation: bounce 1.2s ease-in-out infinite; }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-8px)} }
+
+  /* Results */
+  .results { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .scenario-summary { font-size: 13px; color: var(--ink-secondary); line-height: 1.6; padding: 10px 14px; background: var(--surface-tertiary); border-radius: var(--radius); margin-bottom: 1.5rem; border-left: 3px solid var(--green); }
+  .results-section-label { font-size: 11px; color: var(--ink-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .options-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 2.5rem; }
+  .option-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem; display: flex; flex-direction: column; gap: 8px; }
+  .option-card.best { border: 2px solid var(--green); }
+  .best-label { font-size: 10px; font-weight: 500; color: var(--green-dark); background: var(--green-light); padding: 3px 10px; border-radius: 20px; display: inline-block; width: fit-content; }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; display: inline-block; width: fit-content; font-weight: 500; }
+  .badge-green { background: var(--green-light); color: var(--green-dark); }
+  .badge-amber { background: var(--amber-light); color: var(--amber-dark); }
+  .badge-gray { background: var(--surface-tertiary); color: var(--ink-secondary); }
+  .badge-purple { background: var(--purple-light); color: var(--purple-dark); }
+  .card-title { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.4; }
+  .card-desc { font-size: 13px; color: var(--ink-secondary); line-height: 1.6; }
+  .card-divider { height: 1px; background: var(--border); margin: 4px 0; }
+  .card-sub-label { font-size: 10px; color: var(--ink-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
+  .card-seen { font-size: 12px; color: var(--ink-secondary); line-height: 1.5; }
+  .reminder { display: flex; gap: 8px; align-items: flex-start; margin-top: 6px; }
+  .reminder-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; margin-top: 6px; }
+  .reminder-text { font-size: 12px; color: var(--ink-secondary); line-height: 1.5; }
+  .reminder-why { font-size: 11px; color: var(--ink-tertiary); line-height: 1.4; margin-top: 2px; }
+
+  /* TE tools */
+  .te-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .te-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem; display: flex; flex-direction: column; gap: 8px; }
+  .te-def { font-size: 12px; color: var(--ink-tertiary); font-style: italic; line-height: 1.5; }
+  .te-why { font-size: 13px; color: var(--ink-secondary); line-height: 1.6; }
+  .te-example { font-size: 12px; color: var(--ink-secondary); line-height: 1.6; padding: 8px 10px; background: var(--surface-secondary); border-left: 2px solid var(--purple-mid); }
+  .te-profile-note { font-size: 11px; color: var(--ink-tertiary); line-height: 1.5; }
+
+  .reset-btn { font-size: 13px; color: var(--ink-tertiary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; margin-top: 1.5rem; display: block; }
+  .reset-btn:hover { color: var(--ink-secondary); }
+
+  .error-msg { padding: 12px 16px; background: #FCEBEB; border: 1px solid #F09595; border-radius: var(--radius); font-size: 13px; color: #A32D2D; margin-top: 1rem; }
+
+  @media (max-width: 680px) {
+    .options-grid, .te-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-top">
+      <div class="wordmark">Spotlight <span>Scenario</span></div>
+      <div class="tagline">Leadership coaching tool</div>
+    </div>
+  </div>
+
+  <!-- Access screen -->
+  <div class="screen active" id="screen-access">
+    <div class="access-wrap">
+      <h1>Know yourself.<br><em>Lead better.</em></h1>
+      <p>Enter your access code to begin your personalised scenario analysis.</p>
+      <input class="access-field" id="access-input" type="text" placeholder="e.g. AndrewG" autocomplete="off" />
+      <div class="access-error" id="access-error"></div>
+      <button class="btn-primary" onclick="handleAccess()">Enter</button>
+    </div>
+  </div>
+
+  <!-- Main app screen -->
+  <div class="screen" id="screen-main">
+
+    <div class="profile-bar">
+      <div class="profile-left">
+        <div class="profile-avatar" id="profile-avatar">AG</div>
+        <div>
+          <div class="profile-name" id="profile-name">Andrew Gemmell</div>
+          <div class="profile-pills" id="profile-pills"></div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Change profile</button>
+    </div>
+
+    <div id="input-section">
+      <div class="input-section">
+        <label class="input-label" for="scenario-input">Describe your scenario</label>
+        <textarea class="scenario-textarea" id="scenario-input" placeholder="Describe a real situation you need to navigate — a conversation, decision, or leadership challenge. The more context you give, the more specific the coaching will be."></textarea>
+        <button class="analyse-btn" id="analyse-btn" onclick="analyse()">Analyse scenario →</button>
+      </div>
+      <div id="error-msg" style="display:none;" class="error-msg"></div>
+    </div>
+
+    <div id="output-section" style="display:none;"></div>
+
+  </div>
+
+</div>
+
+<script>
+const PROFILES = {
+  "AndrewG": {
+    name: "Andrew Gemmell",
+    initials: "AG",
+    style: "Empathic + Expressive",
+    mindset: "Contained",
+    spotlight: "Empathically Contained",
+    data: `Andrew Gemmell — Spotlight profile:
+Behavioural style: Empathic and Expressive — people-focused, nurturing, warm, cooperative, encouraging.
+Mindset: Contained — calm, measured, pragmatic, not easily excitable, reliable.
+Combined spotlight: Empathically Contained.
+
+Strengths: warm and endearing character, makes time for people and helps them solve problems, brings calm and rational approach when others rush in, shows vulnerability to help others, brings people together, considers all factors before deciding, knows when things are too good to be true.
+
+Over-play risks: overly reassuring when challenge is needed, over-investing in others' problems, overly involving others and avoiding personal responsibility, appearing too cautious, delaying action until 100% certain, avoiding difficult conversations, tolerating mediocrity, over-playing devil's advocate.
+
+Counter-weights needed: tackle elephants in the room directly, show excitement and urgency when warranted, avoid deferring difficult conversations indefinitely, step outside comfort zone, be mindful tolerant approach may accept what shouldn't be accepted, consider that we often regret what we didn't do more than what we did.
+
+Under pressure risks: struggling to self-motivate, becoming overly concerned about others' opinions, becoming overly sensitive about feelings, becoming adamant he knows best, needlessly worrying about others, disconnecting from the task.
+
+Stressors: lack of teamwork or team ethos, others being distracted whilst talking to him, cold or distant leadership styles, unattainable demands, others displaying strong emotional responses, unnecessary deviation from routine.`
+  },
+  "MichelleF": {
+    name: "Michelle Fox",
+    initials: "MF",
+    style: "Logical + Empathic",
+    mindset: "Contained",
+    spotlight: "Logically Contained",
+    data: `Michelle Fox — Spotlight profile:
+Behavioural style: Logical (primary) — analytical, reflective, independent, methodical, detail-oriented, private, thoughtful. Secondary: Empathic.
+Mindset: Contained — calm, measured, pragmatic, not easily excitable, reliable, consistent.
+Combined spotlight: Logically Contained.
+
+Strengths: quickly understands underlying principles, well-reasoned and rational approach when others rush, takes deliberate action to mitigate risks, creative problem solver, brings organisation and attention to detail, bridges instinct and reason, helps others grasp complex topics, calm and cautious decision-making.
+
+Over-play risks: over-prepares and can't react in the moment, overanalyses others' actions, assumes everyone wants the same depth of detail, appears overly cautious or risk-averse, spends so much time organising she delays doing, overcomplicates simple problems, being overly concerned with fairness preventing decisive action.
+
+Counter-weights needed: imperfect action is better than perfect inaction, learn to argue her point in the moment rather than after the event, not everyone shares her passion for detail — sometimes quicker and more decisive is better, what she fears doing most is often what she most needs to do, sometimes take a risk and work it out as she goes, practise putting complex ideas into words in the moment.
+
+Under pressure risks: craves perfect information and processes, disappears into internal world, paralysis by analysis, becomes increasingly detached and remote, refuses to accept authority of others, becomes adamant she knows best.
+
+Stressors: being forced to decide without time to reflect, others displaying strong emotional responses, people being sloppy or not thinking things through, being prevented from preparing properly, inefficient or poorly thought-through approaches, being rushed to share judgement before fully assessing.`
+  }
+};
+
+const TE_DEFS = {
+  "Labelling": "Name their emotion before they do. 'It seems like...' or 'It sounds like...'",
+  "Mirroring": "Repeat the last 1–3 words as a question. Then stay silent.",
+  "Accusation audit": "Name their negative assumptions first, before they raise them. Disarms defensiveness.",
+  "Calibrated question": "'How' and 'what' questions only. Never 'why.' Invites them to solve the problem.",
+  "That's right": "The goal of the conversation. Not 'you're right' — earn 'that's right.'",
+  "Dynamic silence": "After a label or mirror — stay quiet. Let them fill the space."
+};
+
+let currentProfile = null;
+
+function handleAccess() {
+  const code = document.getElementById('access-input').value.trim();
+  const profile = PROFILES[code];
+  if (!profile) {
+    document.getElementById('access-error').textContent = 'Access code not recognised. Please check and try again.';
+    return;
+  }
+  currentProfile = profile;
+  loadProfile(profile);
+  showScreen('screen-main');
+}
+
+document.getElementById('access-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleAccess();
+});
+
+function loadProfile(p) {
+  document.getElementById('profile-avatar').textContent = p.initials;
+  document.getElementById('profile-name').textContent = p.name;
+  const pillsHtml = [
+    `<span class="pill"><strong>Style:</strong> ${p.style}</span>`,
+    `<span class="pill"><strong>Mindset:</strong> ${p.mindset}</span>`,
+    `<span class="pill"><strong>Profile:</strong> ${p.spotlight}</span>`
+  ].join('');
+  document.getElementById('profile-pills').innerHTML = pillsHtml;
+}
+
+function logout() {
+  currentProfile = null;
+  document.getElementById('access-input').value = '';
+  document.getElementById('access-error').textContent = '';
+  document.getElementById('scenario-input').value = '';
+  document.getElementById('output-section').style.display = 'none';
+  document.getElementById('input-section').style.display = 'block';
+  document.getElementById('error-msg').style.display = 'none';
+  showScreen('screen-access');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+async function analyse() {
+  const scenario = document.getElementById('scenario-input').value.trim();
+  if (!scenario || !currentProfile) return;
+
+  const btn = document.getElementById('analyse-btn');
+  btn.disabled = true;
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('input-section').style.display = 'none';
+  document.getElementById('output-section').style.display = 'block';
+  document.getElementById('output-section').innerHTML = `
+    <div class="loading">
+      <div style="margin-bottom:1rem;">
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+      </div>
+      Analysing your scenario…
+    </div>`;
+
+  try {
+    const res = await fetch('/api/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: currentProfile.data, scenario })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderResults(data, scenario);
+  } catch (e) {
+    document.getElementById('output-section').style.display = 'none';
+    document.getElementById('input-section').style.display = 'block';
+    const errEl = document.getElementById('error-msg');
+    errEl.style.display = 'block';
+    errEl.textContent = 'Something went wrong: ' + e.message;
+    btn.disabled = false;
+  }
+}
+
+function renderResults(d, scenario) {
+  const bc = b => b.includes('strengths') ? 'badge-green' : b.includes('Stretches') ? 'badge-green' : b.includes('Risk') ? 'badge-amber' : 'badge-gray';
+
+  let html = `<div class="results">`;
+  html += `<div class="scenario-summary">${d.scenario_summary || scenario}</div>`;
+
+  html += `<p class="results-section-label" style="margin-bottom:12px;">Three options to consider</p>`;
+  html += `<div class="options-grid">`;
+  d.options.forEach(o => {
+    html += `<div class="option-card${o.recommended ? ' best' : ''}">
+      ${o.recommended ? '<span class="best-label">Best balance</span>' : ''}
+      <span class="badge ${bc(o.badge)}">${o.badge}</span>
+      <p class="card-title">${o.title}</p>
+      <p class="card-desc">${o.desc}</p>
+      <div class="card-divider"></div>
+      <p class="card-sub-label">How others may see this</p>
+      <p class="card-seen">${o.seen_as}</p>
+      <div class="card-divider"></div>
+      <p class="card-sub-label">Key reminders</p>
+      ${o.reminders.map(r => `
+        <div class="reminder">
+          <div class="reminder-dot"></div>
+          <div>
+            <p class="reminder-text">${r.text}</p>
+            <p class="reminder-why">${r.why}</p>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<p class="results-section-label" style="margin-bottom:12px;">Tactical empathy tools for this conversation</p>`;
+  html += `<div class="te-grid">`;
+  d.te_tools.forEach(t => {
+    html += `<div class="te-card">
+      <span class="badge badge-purple">${t.tool}</span>
+      <p class="te-def">${TE_DEFS[t.tool] || ''}</p>
+      <p class="te-why">${t.why_relevant}</p>
+      <div class="te-example">"${t.example}"</div>
+      <div class="card-divider"></div>
+      <p class="card-sub-label">Profile note</p>
+      <p class="te-profile-note">${t.profile_note}</p>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<button class="reset-btn" onclick="resetScenario()">← Analyse a new scenario</button>`;
+  html += `</div>`;
+
+  document.getElementById('output-section').innerHTML = html;
+}
+
+function resetScenario() {
+  document.getElementById('output-section').style.display = 'none';
+  document.getElementById('output-section').innerHTML = '';
+  document.getElementById('input-section').style.display = 'block';
+  document.getElementById('scenario-input').value = '';
+  document.getElementById('analyse-btn').disabled = false;
+}
+</script>
+</body>
+</html>
